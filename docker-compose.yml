@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # FOR LOCAL DEVELOPMENT
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - scraper-network
+    ports:
+      - "5433:5432"
+
+  # SCRAPING APP WITH CRON JOB
+  scraper:
+    build: .
+    init: true
+    privileged: true
+    depends_on:
+      - db
+    env_file: 
+      - .env
+    networks:
+      - scraper-network
+
+volumes:
+  db-data:
+
+networks:
+  scraper-network:
+    driver: bridge
